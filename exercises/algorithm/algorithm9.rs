@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,15 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        let mut cur = self.count;
+        let mut parent = self.parent_idx(cur);
+        while parent != 0 && (self.comparator)(&self.items[cur], &self.items[parent]) {
+            self.items.swap(cur, parent);
+            cur = parent;
+            parent = self.parent_idx(cur);
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -58,7 +65,17 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+		if self.left_child_idx(idx) > self.count {
+            0
+        } else if self.right_child_idx(idx) > self.count {
+            self.left_child_idx(idx)
+        } else {
+            if (self.comparator)(&self.items[self.left_child_idx(idx)], &self.items[self.right_child_idx(idx)]) {
+                self.left_child_idx(idx)
+            }else {
+                self.right_child_idx(idx)
+            }
+        }
     }
 }
 
@@ -79,13 +96,31 @@ where
 
 impl<T> Iterator for Heap<T>
 where
-    T: Default,
+    T: Clone + Default,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            None
+        } else {
+            let res = self.items[1].clone();
+            self.items.swap(1, self.count);
+            self.items.pop();
+            self.count -= 1;
+
+            if !self.is_empty() {
+                let mut cur :usize= 1;
+                let mut idx = self.smallest_child_idx(cur);
+                while idx != 0 && !(self.comparator)(&self.items[cur], &self.items[idx]) {
+                    self.items.swap(cur, idx);
+                    cur = idx;
+                    idx = self.smallest_child_idx(cur);
+                }
+            }
+
+            Some(res)
+        }
     }
 }
 
